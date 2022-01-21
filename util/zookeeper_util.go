@@ -62,7 +62,7 @@ func ZKAdd(conn *zk.Conn, path string, value string, flag int32) {
 	}
 	s, err := conn.Create(path, data, flag, acls)
 	if err != nil {
-		log.Printf("创建失败: %v\n", err)
+		log.Printf("zookeeper create fail: %v %v\n", path, err)
 		return
 	}
 	log.Printf(" zookeeper createnote: %s ", s)
