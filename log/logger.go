@@ -7,6 +7,7 @@ package log
 import (
 	"bytes"
 	"fmt"
+	"github.com/jzyong/golib/util"
 	"io"
 	"os"
 	"runtime"
@@ -50,6 +51,7 @@ var levels = []string{
 	"[FATAL]",
 }
 
+// 日志
 type Logger struct {
 	//确保多协程读写文件，防止文件内容混乱，做到协程安全
 	mu sync.Mutex
@@ -57,37 +59,43 @@ type Logger struct {
 	prefix string
 	//日志标记位
 	flag int
-	//日志输出的文件描述符
-	out io.Writer
+	//控制台输出的文件描述符
+	consoleOutWriter io.Writer
 	//输出的缓冲区
 	buf bytes.Buffer
 	//当前日志绑定的输出文件
 	file *os.File
+	// 文件创建时间
+	fileCreateTime time.Time
+	//文件名称
+	fileName string
+	//文件路径
+	filePath string
 	//是否打印调试debug信息
 	debugClose bool
 	//获取日志文件名和代码上述的runtime.Call 的函数调用层数
-	calldDepth int
+	callDepth int
 }
 
 /*
 	创建一个日志
-	out: 标准输出的文件io
+	consoleOutWriter: 标准输出的文件io
 	prefix: 日志的前缀
 	flag: 当前日志头部信息的标记位
 */
-func NewLogger(out io.Writer, prefix string, flag int) *Logger {
+func NewLogger(prefix string, flag int) *Logger {
 
 	//默认 debug打开， calledDepth深度为2,ZinxLogger对象调用日志打印方法最多调用两层到达output函数
-	zlog := &Logger{out: out, prefix: prefix, flag: flag, file: nil, debugClose: false, calldDepth: 2}
+	log := &Logger{consoleOutWriter: os.Stderr, prefix: prefix, flag: flag, file: nil, debugClose: false, callDepth: 2}
 	//设置log对象 回收资源 析构方法(不设置也可以，go的Gc会自动回收，强迫症没办法)
-	runtime.SetFinalizer(zlog, CleanZinxLog)
-	return zlog
+	runtime.SetFinalizer(log, CleanLog)
+	return log
 }
 
 /*
    回收日志处理
 */
-func CleanZinxLog(log *Logger) {
+func CleanLog(log *Logger) {
 	log.closeFile()
 }
 
@@ -174,7 +182,7 @@ func (log *Logger) OutPut(level int, s string) error {
 		log.mu.Unlock()
 		var ok bool
 		//得到当前调用者的文件名称和执行到的代码行数
-		_, file, line, ok = runtime.Caller(log.calldDepth)
+		_, file, line, ok = runtime.Caller(log.callDepth)
 		if !ok {
 			file = "unknown-file"
 			line = 0
@@ -194,72 +202,49 @@ func (log *Logger) OutPut(level int, s string) error {
 	}
 
 	//将填充好的buf 写到IO输出上
-	_, err := log.out.Write(log.buf.Bytes())
+	_, err := log.consoleOutWriter.Write(log.buf.Bytes())
+	if log.file != nil {
+		//检测是否创建新的日志
+		if !util.SameDay(now, log.fileCreateTime) {
+			SetLogFile(log.filePath, log.fileName)
+		}
+		_, err = log.file.Write(log.buf.Bytes())
+	}
 	return err
 }
 
 // ====> Debug <====
-func (log *Logger) Debugf(format string, v ...interface{}) {
+func (log *Logger) Debug(format string, v ...interface{}) {
 	if log.debugClose == true {
 		return
 	}
 	_ = log.OutPut(LogDebug, fmt.Sprintf(format, v...))
 }
 
-func (log *Logger) Debug(v ...interface{}) {
-	if log.debugClose == true {
-		return
-	}
-	_ = log.OutPut(LogDebug, fmt.Sprintln(v...))
-}
-
 // ====> Info <====
-func (log *Logger) Infof(format string, v ...interface{}) {
+func (log *Logger) Info(format string, v ...interface{}) {
 	_ = log.OutPut(LogInfo, fmt.Sprintf(format, v...))
 }
 
-func (log *Logger) Info(v ...interface{}) {
-	_ = log.OutPut(LogInfo, fmt.Sprintln(v...))
-}
-
 // ====> Warn <====
-func (log *Logger) Warnf(format string, v ...interface{}) {
+func (log *Logger) Warn(format string, v ...interface{}) {
 	_ = log.OutPut(LogWarn, fmt.Sprintf(format, v...))
 }
 
-func (log *Logger) Warn(v ...interface{}) {
-	_ = log.OutPut(LogWarn, fmt.Sprintln(v...))
-}
-
 // ====> Error <====
-func (log *Logger) Errorf(format string, v ...interface{}) {
+func (log *Logger) Error(format string, v ...interface{}) {
 	_ = log.OutPut(LogError, fmt.Sprintf(format, v...))
 }
 
-func (log *Logger) Error(v ...interface{}) {
-	_ = log.OutPut(LogError, fmt.Sprintln(v...))
-}
-
 // ====> Fatal 需要终止程序 <====
-func (log *Logger) Fatalf(format string, v ...interface{}) {
+func (log *Logger) Fatal(format string, v ...interface{}) {
 	_ = log.OutPut(LogFatal, fmt.Sprintf(format, v...))
 	os.Exit(1)
 }
 
-func (log *Logger) Fatal(v ...interface{}) {
-	_ = log.OutPut(LogFatal, fmt.Sprintln(v...))
-	os.Exit(1)
-}
-
 // ====> Panic  <====
-func (log *Logger) Panicf(format string, v ...interface{}) {
+func (log *Logger) Panic(format string, v ...interface{}) {
 	s := fmt.Sprintf(format, v...)
-	_ = log.OutPut(LogPanic, s)
-	panic(s)
-}
-
-func (log *Logger) Panic(v ...interface{}) {
-	s := fmt.Sprintln(v...)
 	_ = log.OutPut(LogPanic, s)
 	panic(s)
 }
@@ -304,13 +289,15 @@ func (log *Logger) SetPrefix(prefix string) {
 }
 
 //设置日志文件输出
-func (log *Logger) SetLogFile(fileDir string, fileName string) {
+func (log *Logger) SetLogFile(filePath string, fileName string) {
 	var file *os.File
-
+	log.fileName = fileName
+	log.filePath = filePath
+	log.fileCreateTime = time.Now()
 	//创建日志文件夹
-	_ = mkdirLog(fileDir)
+	_ = mkdirLog(filePath)
 
-	fullPath := fileDir + "/" + fileName
+	fullPath := filePath + "/" + fileName + "_" + time.Now().Format("2006-01-02") + ".log"
 	if log.checkFileExist(fullPath) {
 		//文件存在，打开
 		file, _ = os.OpenFile(fullPath, os.O_APPEND|os.O_RDWR, 0644)
@@ -325,7 +312,7 @@ func (log *Logger) SetLogFile(fileDir string, fileName string) {
 	//关闭之前绑定的文件
 	log.closeFile()
 	log.file = file
-	log.out = file
+	//log.consoleOutWriter = file
 }
 
 //关闭日志绑定的文件
@@ -333,7 +320,6 @@ func (log *Logger) closeFile() {
 	if log.file != nil {
 		_ = log.file.Close()
 		log.file = nil
-		log.out = os.Stderr
 	}
 }
 
@@ -356,6 +342,7 @@ func (log *Logger) checkFileExist(filename string) bool {
 	return exist
 }
 
+//创建日志目录
 func mkdirLog(dir string) (e error) {
 	_, er := os.Stat(dir)
 	b := er == nil || os.IsExist(er)
