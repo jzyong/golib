@@ -1,6 +1,3 @@
-module github.com/dls/slots/golib
+module github.com/jzyong/golib
 
 go 1.14
-
-require (
-)
