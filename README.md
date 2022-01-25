@@ -3,7 +3,8 @@
 
 Directory	                |Description
 --------------------------- |------------------------------              
-log                         | log component
+log                         | Log component
+network                     | Network communication component
 util                        | some common util
 
 
