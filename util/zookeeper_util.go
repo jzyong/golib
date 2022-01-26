@@ -3,7 +3,7 @@ package util
 import (
 	"fmt"
 	"github.com/go-zookeeper/zk"
-	"log"
+	log "github.com/jzyong/golib/log"
 	"strings"
 	"time"
 )
@@ -17,7 +17,7 @@ import (
 func ZKCreateConnect(hosts []string) *zk.Conn {
 	connect, _, err := zk.Connect(hosts, time.Second*5)
 	if err != nil {
-		log.Print(err)
+		log.Error("", err)
 		return nil
 	}
 	return connect
@@ -48,7 +48,7 @@ func ZKAdd(conn *zk.Conn, path string, value string, flag int32) {
 
 		exist, _, err2 := conn.Exists(build.String())
 		if err2 != nil {
-			log.Printf("创建节点%s %s失败，%v", path, build.String(), err2)
+			log.Info("创建节点%s %s失败，%v", path, build.String(), err2)
 			return
 		}
 		if exist {
@@ -57,15 +57,15 @@ func ZKAdd(conn *zk.Conn, path string, value string, flag int32) {
 		}
 		//父节点永久存在
 		conn.Create(build.String(), []byte(""), 0, acls)
-		log.Printf("创建父节点：%s", build.String())
+		log.Info("create parent node：%s", build.String())
 		build.WriteString("/")
 	}
 	s, err := conn.Create(path, data, flag, acls)
 	if err != nil {
-		log.Printf("zookeeper create fail: %v %v\n", path, err)
+		log.Error("zookeeper create fail: %v %v\n", path, err)
 		return
 	}
-	log.Printf(" zookeeper createnote: %s ", s)
+	log.Info(" zookeeper createnote: %s ", s)
 }
 
 // 查
@@ -75,7 +75,7 @@ func ZKGet(conn *zk.Conn, path string) string {
 		fmt.Printf("查询%s失败, err: %v\n", path, err)
 		return ""
 	}
-	log.Printf("%s 的值为 %s\n", path, string(data))
+	log.Info("%s 的值为 %s\n", path, string(data))
 	return string(data)
 }
 
@@ -87,7 +87,7 @@ func ZKUpdate(conn *zk.Conn, path string, value string) {
 	//先检查节点是否存在，不存在创建新的
 	exist, _, err2 := conn.Exists(path)
 	if err2 != nil {
-		log.Printf("更新节点%s 失败，%v", path, err2)
+		log.Error("更新节点%s 失败，%v", path, err2)
 		return
 	}
 	if !exist {
@@ -102,7 +102,7 @@ func ZKUpdate(conn *zk.Conn, path string, value string) {
 		fmt.Printf("数据修改失败: %v\n", err)
 		return
 	}
-	log.Printf("%s update to:%s\n", path, value)
+	log.Info("%s update to:%s\n", path, value)
 }
 
 // 删
@@ -113,7 +113,7 @@ func ZKDelete(conn *zk.Conn, path string) {
 		fmt.Printf("数据删除失败: %v\n", err)
 		return
 	}
-	log.Printf("路径%s 删除", path)
+	log.Info("路径%s 删除", path)
 }
 
 //事件监听 只能监听一层子目录？
@@ -134,7 +134,7 @@ func ZKWatchChildrenW(conn *zk.Conn, path string) (chan []string, chan error) {
 				errors <- e.Err
 				return
 			}
-			log.Printf("路径：%v 发生改变：%v", path, e)
+			log.Info("路径：%v 发生改变：%v", path, e)
 		}
 	}()
 	return children, errors
