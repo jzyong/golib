@@ -204,7 +204,7 @@ func (log *Logger) OutPut(level int, s string) error {
 	_, err := log.consoleOutWriter.Write(log.buf.Bytes())
 	if log.file != nil {
 		//检测是否创建新的日志
-		if sameDay(now, log.fileCreateTime) {
+		if !sameDay(now, log.fileCreateTime) {
 			SetLogFile(log.filePath, log.fileName)
 		}
 		_, err = log.file.Write(log.buf.Bytes())
