@@ -3,7 +3,7 @@ package util
 import (
 	"fmt"
 	"github.com/go-zookeeper/zk"
-	log "github.com/jzyong/golib/log"
+	"github.com/jzyong/golib/log"
 	"strings"
 	"time"
 )
@@ -17,7 +17,7 @@ import (
 func ZKCreateConnect(hosts []string) *zk.Conn {
 	connect, _, err := zk.Connect(hosts, time.Second*5)
 	if err != nil {
-		log.Error("", err)
+		log.Error("%v", err)
 		return nil
 	}
 	return connect

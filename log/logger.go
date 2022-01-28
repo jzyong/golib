@@ -7,7 +7,6 @@ package log
 import (
 	"bytes"
 	"fmt"
-	"github.com/jzyong/golib/util"
 	"io"
 	"os"
 	"runtime"
@@ -205,7 +204,7 @@ func (log *Logger) OutPut(level int, s string) error {
 	_, err := log.consoleOutWriter.Write(log.buf.Bytes())
 	if log.file != nil {
 		//检测是否创建新的日志
-		if !util.SameDay(now, log.fileCreateTime) {
+		if sameDay(now, log.fileCreateTime) {
 			SetLogFile(log.filePath, log.fileName)
 		}
 		_, err = log.file.Write(log.buf.Bytes())
@@ -379,4 +378,9 @@ func itoa(buf *bytes.Buffer, i int, wid int) {
 		buf.WriteByte(b[bp])
 		bp++
 	}
+}
+
+//是否为同一天
+func sameDay(a, b time.Time) bool {
+	return a.Year() == b.Year() && a.YearDay() == b.YearDay()
 }
