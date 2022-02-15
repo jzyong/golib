@@ -13,9 +13,9 @@ import (
 
 const (
 	//默认缓冲触发函数队列大小
-	MAX_CHAN_BUFF = 2048
+	MaxChanBuff = 2048
 	//默认最大误差时间
-	MAX_TIME_DELAY = 100
+	MaxTimeDelay = 100
 )
 
 //调度池
@@ -38,73 +38,73 @@ type ScheduledPool struct {
 func NewScheduledPool() *ScheduledPool {
 
 	//创建秒级时间轮
-	second_tw := NewTimeWheel(SecondName, SecondInterval, SecondScales, TimersMaxCap)
+	secondTw := NewTimeWheel(SecondName, SecondInterval, SecondScales, TimersMaxCap)
 	//创建分钟级时间轮
-	minute_tw := NewTimeWheel(MinuteName, MinuteInterval, MinuteScales, TimersMaxCap)
+	minuteTw := NewTimeWheel(MinuteName, MinuteInterval, MinuteScales, TimersMaxCap)
 	//创建小时级时间轮
-	hour_tw := NewTimeWheel(HourName, HourInterval, HourScales, TimersMaxCap)
+	hourTw := NewTimeWheel(HourName, HourInterval, HourScales, TimersMaxCap)
 
 	//将分层时间轮做关联
-	hour_tw.AddTimeWheel(minute_tw)
-	minute_tw.AddTimeWheel(second_tw)
+	hourTw.AddTimeWheel(minuteTw)
+	minuteTw.AddTimeWheel(secondTw)
 
 	//时间轮运行
-	second_tw.Run()
-	minute_tw.Run()
-	hour_tw.Run()
+	secondTw.Run()
+	minuteTw.Run()
+	hourTw.Run()
 
 	return &ScheduledPool{
-		tw:          hour_tw,
-		triggerChan: make(chan *Runnable, MAX_CHAN_BUFF),
+		tw:          hourTw,
+		triggerChan: make(chan *Runnable, MaxChanBuff),
 	}
 }
 
 //创建一个定点Timer 并将Timer添加到分层时间轮中， 返回Timer的tid
-func (this *ScheduledPool) CreateTimerAt(runnable *Runnable, unixNano int64) (uint32, error) {
-	this.Lock()
-	defer this.Unlock()
-	this.idGen++
-	return this.idGen, this.tw.AddScheduledTask(this.idGen, NewScheduledTask(runnable, unixNano))
+func (p *ScheduledPool) CreateTimerAt(runnable *Runnable, unixNano int64) (uint32, error) {
+	p.Lock()
+	defer p.Unlock()
+	p.idGen++
+	return p.idGen, p.tw.AddScheduledTask(p.idGen, NewScheduledTask(runnable, unixNano))
 }
 
 //创建一个延迟Timer 并将Timer添加到分层时间轮中， 返回Timer的tid
-func (this *ScheduledPool) CreateTimerAfter(df *Runnable, duration time.Duration) (uint32, error) {
-	this.Lock()
-	defer this.Unlock()
-	this.idGen++
-	return this.idGen, this.tw.AddScheduledTask(this.idGen, NewScheduledTaskAfter(df, duration))
+func (p *ScheduledPool) CreateTimerAfter(df *Runnable, duration time.Duration) (uint32, error) {
+	p.Lock()
+	defer p.Unlock()
+	p.idGen++
+	return p.idGen, p.tw.AddScheduledTask(p.idGen, NewScheduledTaskAfter(df, duration))
 }
 
 //删除timer
-func (this *ScheduledPool) CancelTimer(id uint32) {
-	this.Lock()
-	this.Unlock()
+func (p *ScheduledPool) CancelTimer(id uint32) {
+	p.Lock()
+	p.Unlock()
 
-	this.tw.RemoveScheduledTask(id)
+	p.tw.RemoveScheduledTask(id)
 }
 
 //获取计时结束的延迟执行函数通道
-func (this *ScheduledPool) GetTriggerChan() chan *Runnable {
-	return this.triggerChan
+func (p *ScheduledPool) GetTriggerChan() chan *Runnable {
+	return p.triggerChan
 }
 
 //非阻塞的方式启动timerSchedule，只取出，不执行任务
-func (this *ScheduledPool) Start() {
+func (p *ScheduledPool) Start() {
 	go func() {
 		for {
 			//当前时间
 			now := UnixMilli()
 			//获取最近MAX_TIME_DELAY 毫秒的超时定时器集合
-			tasks := this.tw.GetScheduledTaskWithIn(MAX_TIME_DELAY * time.Millisecond)
+			tasks := p.tw.GetScheduledTaskWithIn(MaxTimeDelay * time.Millisecond)
 			for _, task := range tasks {
-				if math.Abs(float64(now-task.unixTime)) > MAX_TIME_DELAY {
+				if math.Abs(float64(now-task.unixTime)) > MaxTimeDelay {
 					//已经超时的定时器，报警
 					log.Error("want call at %v real call at %v delay %v", task.unixTime, now, now-task.unixTime)
 				}
 				//将超时触发函数写入管道
-				this.triggerChan <- task.runnable
+				p.triggerChan <- task.runnable
 			}
-			time.Sleep(MAX_TIME_DELAY / 2 * time.Millisecond)
+			time.Sleep(MaxTimeDelay / 2 * time.Millisecond)
 		}
 	}()
 }

@@ -45,7 +45,7 @@ type TimeWheel struct {
 	maxCap: 每个刻度所最大保存的Timer定时器个数
 */
 func NewTimeWheel(name string, interval int64, scales int, maxCap int) *TimeWheel {
-	tw := &TimeWheel{
+	timeWheel := &TimeWheel{
 		name:               name,
 		interval:           interval,
 		scales:             scales,
@@ -54,10 +54,10 @@ func NewTimeWheel(name string, interval int64, scales int, maxCap int) *TimeWhee
 	}
 	//初始化map
 	for i := 0; i < scales; i++ {
-		tw.scheduledTaskQueue[i] = make(map[uint32]*ScheduledTask, maxCap)
+		timeWheel.scheduledTaskQueue[i] = make(map[uint32]*ScheduledTask, maxCap)
 	}
-	log.Info("Init timerWheel name = %v is Done!", tw.name)
-	return tw
+	log.Info("Init timer wheel name = %v is Done!", timeWheel.name)
+	return timeWheel
 }
 
 /*
@@ -144,7 +144,7 @@ func (tw *TimeWheel) RemoveScheduledTask(id uint32) {
 */
 func (tw *TimeWheel) AddTimeWheel(next *TimeWheel) {
 	tw.nextTimeWheel = next
-	log.Info("Add timer Whell[%v]'s next [%v] is success!", tw.name, next.name)
+	log.Info("Add timer wheel [%v]'s next [%v] is success!", tw.name, next.name)
 }
 
 /*
@@ -182,7 +182,7 @@ func (tw *TimeWheel) run() {
 //非阻塞的方式让时间轮转起来
 func (tw *TimeWheel) Run() {
 	go tw.run()
-	log.Info("timerWheel name = %v is running...", tw.name)
+	log.Info("timer Wheel name = %v is running...", tw.name)
 }
 
 //获取定时器在一段时间间隔内的Timer

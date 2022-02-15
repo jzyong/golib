@@ -12,53 +12,53 @@ import (
 
 func TestTimerWheel(t *testing.T) {
 	//创建秒级时间轮
-	second_tw := NewTimeWheel(SecondName, SecondInterval, SecondScales, TimersMaxCap)
+	secondTw := NewTimeWheel(SecondName, SecondInterval, SecondScales, TimersMaxCap)
 
 	//创建分钟级时间轮
-	minute_tw := NewTimeWheel(MinuteName, MinuteInterval, MinuteScales, TimersMaxCap)
+	minuteTw := NewTimeWheel(MinuteName, MinuteInterval, MinuteScales, TimersMaxCap)
 
 	//创建小时级时间轮
-	hour_tw := NewTimeWheel(HourName, HourInterval, HourScales, TimersMaxCap)
+	hourTw := NewTimeWheel(HourName, HourInterval, HourScales, TimersMaxCap)
 
 	//将分层时间轮做关联
-	hour_tw.AddTimeWheel(minute_tw)
-	minute_tw.AddTimeWheel(second_tw)
+	hourTw.AddTimeWheel(minuteTw)
+	minuteTw.AddTimeWheel(secondTw)
 
-	fmt.Println("init timeWheels done!")
+	fmt.Println("init time wheels done!")
 
 	//===== > 以上为初始化分层时间轮 <====
 
 	//给时间轮添加定时器
 	timer1 := NewScheduledTaskAfter(NewRunnable(myFunc, []interface{}{1, 10}), 10*time.Second)
-	_ = hour_tw.AddScheduledTask(1, timer1)
+	_ = hourTw.AddScheduledTask(1, timer1)
 	fmt.Println("add timer 1 done!")
 
 	//给时间轮添加定时器
 	timer2 := NewScheduledTaskAfter(NewRunnable(myFunc, []interface{}{2, 20}), 20*time.Second)
-	_ = hour_tw.AddScheduledTask(2, timer2)
+	_ = hourTw.AddScheduledTask(2, timer2)
 	fmt.Println("add timer 2 done!")
 
 	//给时间轮添加定时器
 	timer3 := NewScheduledTaskAfter(NewRunnable(myFunc, []interface{}{3, 30}), 30*time.Second)
-	_ = hour_tw.AddScheduledTask(3, timer3)
+	_ = hourTw.AddScheduledTask(3, timer3)
 	fmt.Println("add timer 3 done!")
 
 	//给时间轮添加定时器
 	timer4 := NewScheduledTaskAfter(NewRunnable(myFunc, []interface{}{4, 40}), 40*time.Second)
-	_ = hour_tw.AddScheduledTask(4, timer4)
+	_ = hourTw.AddScheduledTask(4, timer4)
 	fmt.Println("add timer 4 done!")
 
 	//给时间轮添加定时器
 	timer5 := NewScheduledTaskAfter(NewRunnable(myFunc, []interface{}{5, 50}), 50*time.Second)
-	_ = hour_tw.AddScheduledTask(5, timer5)
+	_ = hourTw.AddScheduledTask(5, timer5)
 	fmt.Println("add timer 5 done!")
 
 	//时间轮运行
-	second_tw.Run()
-	minute_tw.Run()
-	hour_tw.Run()
+	secondTw.Run()
+	minuteTw.Run()
+	hourTw.Run()
 
-	fmt.Println("timeWheels are run!")
+	fmt.Println("time wheels are run!")
 
 	go func() {
 		n := 0.0
@@ -66,7 +66,7 @@ func TestTimerWheel(t *testing.T) {
 			fmt.Println("tick...", n)
 
 			//取出近1ms的超时定时器有哪些
-			tasks := hour_tw.GetScheduledTaskWithIn(1000 * time.Millisecond)
+			tasks := hourTw.GetScheduledTaskWithIn(1000 * time.Millisecond)
 			for _, task := range tasks {
 				//调用定时器方法
 				task.runnable.Run()
