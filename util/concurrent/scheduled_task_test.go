@@ -14,7 +14,7 @@ func SayHello(message ...interface{}) {
 }
 
 func TestRunnable(t *testing.T) {
-	runnable := NewRunnable(SayHello, []interface{}{"hello", "zinx!"})
+	runnable := NewRunnable(SayHello, []interface{}{"hello", "go lib!"})
 	fmt.Println("runnable.String() = ", runnable.String())
 	runnable.Run()
 }

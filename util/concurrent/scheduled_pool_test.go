@@ -25,7 +25,7 @@ func TestNewScheduledPool(t *testing.T) {
 		f := NewRunnable(foo, []interface{}{i, i * 3})
 		tid, err := timerScheduler.CreateTimerAfter(f, time.Duration(3*i)*time.Millisecond)
 		if err != nil {
-			log.Error("create timer error", tid, err)
+			log.Error("create timer error %v %v", tid, err)
 			break
 		}
 	}
@@ -51,7 +51,7 @@ func TestNewAutoExecuteScheduledPool(t *testing.T) {
 		f := NewRunnable(foo, []interface{}{i, i * 3})
 		tid, err := autoTS.CreateTimerAfter(f, time.Duration(3*i)*time.Millisecond)
 		if err != nil {
-			log.Error("create timer error", tid, err)
+			log.Error("create timer error %v %v", tid, err)
 			break
 		}
 	}

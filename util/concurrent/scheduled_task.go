@@ -8,19 +8,19 @@ import (
 )
 
 const (
-	HOUR_NAME     = "HOUR"
-	HOUR_INTERVAL = 60 * 60 * 1e3 //ms为精度
-	HOUR_SCALES   = 12
+	HourName     = "HOUR"
+	HourInterval = 60 * 60 * 1e3 //ms为精度
+	HourScales   = 12
 
-	MINUTE_NAME     = "MINUTE"
-	MINUTE_INTERVAL = 60 * 1e3
-	MINUTE_SCALES   = 60
+	MinuteName     = "MINUTE"
+	MinuteInterval = 60 * 1e3
+	MinuteScales   = 60
 
-	SECOND_NAME     = "SECOND"
-	SECOND_INTERVAL = 1e3
-	SECOND_SCALES   = 60
+	SecondName     = "SECOND"
+	SecondInterval = 1e3
+	SecondScales   = 60
 
-	TIMERS_MAX_CAP = 2048 //每个时间轮刻度挂载定时器的最大个数
+	TimersMaxCap = 2048 //每个时间轮刻度挂载定时器的最大个数
 )
 
 /*
@@ -35,7 +35,7 @@ type ScheduledTask struct {
 
 //返回1970-1-1至今经历的毫秒数
 func UnixMilli() int64 {
-	return time.Now().UnixNano() / 1e6
+	return time.Now().Unix() * 1000
 }
 
 /*

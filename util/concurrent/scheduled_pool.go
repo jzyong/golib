@@ -38,11 +38,11 @@ type ScheduledPool struct {
 func NewScheduledPool() *ScheduledPool {
 
 	//创建秒级时间轮
-	second_tw := NewTimeWheel(SECOND_NAME, SECOND_INTERVAL, SECOND_SCALES, TIMERS_MAX_CAP)
+	second_tw := NewTimeWheel(SecondName, SecondInterval, SecondScales, TimersMaxCap)
 	//创建分钟级时间轮
-	minute_tw := NewTimeWheel(MINUTE_NAME, MINUTE_INTERVAL, MINUTE_SCALES, TIMERS_MAX_CAP)
+	minute_tw := NewTimeWheel(MinuteName, MinuteInterval, MinuteScales, TimersMaxCap)
 	//创建小时级时间轮
-	hour_tw := NewTimeWheel(HOUR_NAME, HOUR_INTERVAL, HOUR_SCALES, TIMERS_MAX_CAP)
+	hour_tw := NewTimeWheel(HourName, HourInterval, HourScales, TimersMaxCap)
 
 	//将分层时间轮做关联
 	hour_tw.AddTimeWheel(minute_tw)
@@ -99,7 +99,7 @@ func (this *ScheduledPool) Start() {
 			for _, task := range tasks {
 				if math.Abs(float64(now-task.unixTime)) > MAX_TIME_DELAY {
 					//已经超时的定时器，报警
-					log.Error("want call at ", task.unixTime, "; real call at", now, "; delay ", now-task.unixTime)
+					log.Error("want call at %v real call at %v delay %v", task.unixTime, now, now-task.unixTime)
 				}
 				//将超时触发函数写入管道
 				this.triggerChan <- task.runnable
