@@ -2,9 +2,10 @@ package log
 
 import (
 	"testing"
+	"time"
 )
 
-func TestStdZLog(t *testing.T) {
+func TestLogPrint(t *testing.T) {
 
 	//测试 默认debug输出
 	Debug("debug content1")
@@ -36,4 +37,20 @@ func TestStdZLog(t *testing.T) {
 	Debug("===> 我不应该出现~！")
 	Error("===> golib Error  after debug close !!!!")
 
+}
+
+//测试跨天创建文件
+func TestLogCreateFile(t *testing.T) {
+
+	//设置日志写入文件
+	SetLogFile("./log", "golib")
+	go func() {
+		for true {
+			now := time.Now()
+			Info("current second :%v", now.Second())
+
+			time.Sleep(1 * time.Second)
+		}
+	}()
+	select {}
 }

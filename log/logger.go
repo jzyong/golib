@@ -305,9 +305,6 @@ func (log *Logger) SetLogFile(filePath string, fileName string) {
 		file, _ = os.OpenFile(fullPath, os.O_CREATE|os.O_RDWR|os.O_APPEND, 0644)
 	}
 
-	log.mu.Lock()
-	defer log.mu.Unlock()
-
 	//关闭之前绑定的文件
 	log.closeFile()
 	log.file = file
