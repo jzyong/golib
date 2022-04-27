@@ -12,4 +12,8 @@ func TestGetIntHash(t *testing.T) {
 	fmt.Printf("hash Id: %v \n", GetJavaIntHash("192.168.0.3"))
 	fmt.Printf("hash Id: %v \n", GetJavaIntHash("192.168.110.3"))
 	fmt.Printf("hash Id: %v \n", GetJavaIntHash("127.0.0.1"))
+	fmt.Printf("hash Id: %v \n", GetJavaIntHash("1000002"))
+	fmt.Printf("hash Id: %v \n", GetJavaIntHash("1000003"))
+	fmt.Printf("hash Id: %v \n", GetJavaIntHash("1000013"))
+	fmt.Printf("hash Id: %v \n", GetJavaIntHash("1000113"))
 }

@@ -4,7 +4,9 @@ import (
 	"bytes"
 	"encoding/json"
 	"fmt"
+	"log"
 	"reflect"
+	"strconv"
 )
 
 //ToStringIndent 将任意结构转化为json缩进后的字符串 方便输出调试
@@ -43,4 +45,34 @@ func SliceContains(array interface{}, val interface{}) (index int) {
 		}
 	}
 	return
+}
+
+//字符串转int64,失败返回0
+func ParseInt64(numberStr string) int64 {
+	number, err := strconv.ParseInt(numberStr, 10, 64)
+	if err != nil {
+		log.Printf("%v 转换异常：%v", numberStr, err)
+		return 0
+	}
+	return number
+}
+
+//字符串转int32,失败返回0
+func ParseInt32(numberStr string) int32 {
+	number, err := strconv.ParseInt(numberStr, 10, 32)
+	if err != nil {
+		log.Printf("%v 转换异常：%v", numberStr, err)
+		return 0
+	}
+	return int32(number)
+}
+
+//字符串转int,失败返回0
+func ParseInt(numberStr string) int {
+	number, err := strconv.ParseInt(numberStr, 10, 32)
+	if err != nil {
+		log.Printf("%v 转换异常：%v", numberStr, err)
+		return 0
+	}
+	return int(number)
 }
