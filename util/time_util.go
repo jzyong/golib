@@ -31,7 +31,7 @@ func CurrentTimeMillisecond() int64 {
 
 //当前时间，有时间偏移量
 func Now() time.Time {
-	return time.Unix(CurrentTimeSecond(), 0)
+	return time.Unix(CurrentTimeSecond(), int64(time.Now().Nanosecond()))
 }
 
 //是否为同一天
