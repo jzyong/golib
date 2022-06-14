@@ -26,7 +26,7 @@ func CurrentTimeSecond() int64 {
 
 //获取 服务器内部时间戳 ms，可能有偏移量
 func CurrentTimeMillisecond() int64 {
-	return CurrentTimeSecond() * 1000
+	return Now().UnixNano() / 1000000
 }
 
 //当前时间，有时间偏移量

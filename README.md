@@ -9,6 +9,7 @@ util                        | some common util
 
 
 # TODO
+* 消息处理添加缓存池 sync.pool
 
 
 
