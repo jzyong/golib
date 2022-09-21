@@ -76,3 +76,15 @@ func ParseInt(numberStr string) int {
 	}
 	return int(number)
 }
+
+//is the string a port
+func IsPort(p string) bool {
+	pi, err := strconv.Atoi(p)
+	if err != nil {
+		return false
+	}
+	if pi > 65536 || pi < 1 {
+		return false
+	}
+	return true
+}
