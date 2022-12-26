@@ -71,12 +71,12 @@ func ZeroUnixTime(offsetDay int) int64 {
 
 // BetweenNow 是否在当前时间内
 func BetweenNow(startTime, endTime string) bool {
-	start, err := time.Parse("2006-01-02 15:04:05", startTime)
+	start, err := time.ParseInLocation("2006-01-02 15:04:05", startTime, time.Local)
 	if err != nil {
 		log.Error("parse start time %v error:%v", startTime, err)
 		return false
 	}
-	end, err := time.Parse("2006-01-02 15:04:05", endTime)
+	end, err := time.ParseInLocation("2006-01-02 15:04:05", endTime, time.Local)
 	if err != nil {
 		log.Error("parse end time %v error:%v", endTime, err)
 		return false
