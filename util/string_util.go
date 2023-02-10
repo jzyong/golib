@@ -7,9 +7,10 @@ import (
 	"log"
 	"reflect"
 	"strconv"
+	"strings"
 )
 
-//ToStringIndent 将任意结构转化为json缩进后的字符串 方便输出调试
+// ToStringIndent 将任意结构转化为json缩进后的字符串 方便输出调试
 func ToStringIndent(what interface{}) string {
 	b, err := json.Marshal(what)
 	if err != nil {
@@ -20,7 +21,7 @@ func ToStringIndent(what interface{}) string {
 	return out.String()
 }
 
-//ToString 将任意结构转化为json字符串 方便输出调试
+// ToString 将任意结构转化为json字符串 方便输出调试
 func ToString(what interface{}) string {
 	b, err := json.Marshal(what)
 	if err != nil {
@@ -29,7 +30,7 @@ func ToString(what interface{}) string {
 	return string(b)
 }
 
-//是否包含某个元素
+// 是否包含某个元素
 func SliceContains(array interface{}, val interface{}) (index int) {
 	index = -1
 	switch reflect.TypeOf(array).Kind() {
@@ -47,7 +48,7 @@ func SliceContains(array interface{}, val interface{}) (index int) {
 	return
 }
 
-//字符串转int64,失败返回0
+// 字符串转int64,失败返回0
 func ParseInt64(numberStr string) int64 {
 	number, err := strconv.ParseInt(numberStr, 10, 64)
 	if err != nil {
@@ -57,7 +58,7 @@ func ParseInt64(numberStr string) int64 {
 	return number
 }
 
-//字符串转int32,失败返回0
+// 字符串转int32,失败返回0
 func ParseInt32(numberStr string) int32 {
 	number, err := strconv.ParseInt(numberStr, 10, 32)
 	if err != nil {
@@ -67,7 +68,7 @@ func ParseInt32(numberStr string) int32 {
 	return int32(number)
 }
 
-//字符串转int,失败返回0
+// 字符串转int,失败返回0
 func ParseInt(numberStr string) int {
 	number, err := strconv.ParseInt(numberStr, 10, 32)
 	if err != nil {
@@ -77,7 +78,7 @@ func ParseInt(numberStr string) int {
 	return int(number)
 }
 
-//is the string a port
+// is the string a port
 func IsPort(p string) bool {
 	pi, err := strconv.Atoi(p)
 	if err != nil {
@@ -87,4 +88,20 @@ func IsPort(p string) bool {
 		return false
 	}
 	return true
+}
+
+// FirstUpper 字符串首字母大写
+func FirstUpper(s string) string {
+	if s == "" {
+		return ""
+	}
+	return strings.ToUpper(s[:1]) + s[1:]
+}
+
+// FirstLower 字符串首字母小写
+func FirstLower(s string) string {
+	if s == "" {
+		return ""
+	}
+	return strings.ToLower(s[:1]) + s[1:]
 }
