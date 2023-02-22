@@ -4,14 +4,14 @@ import (
 	"encoding/binary"
 	"errors"
 	"fmt"
-	"github.com/golang/protobuf/proto"
 	"github.com/jzyong/golib/log"
+	"google.golang.org/protobuf/proto"
 	"io"
 	"net"
 	"sync"
 )
 
-//定义连接接口
+// 定义连接接口
 type Channel interface {
 	//启动连接，让当前连接开始工作
 	Start()
@@ -41,7 +41,7 @@ type Channel interface {
 	GetMsgBuffChan() chan []byte
 }
 
-//连接会话 实现Channel
+// 连接会话 实现Channel
 type channelImpl struct {
 	//当前Conn属于哪个Server
 	TcpServer Server
@@ -65,7 +65,7 @@ type channelImpl struct {
 	propertyLock sync.RWMutex
 }
 
-//创建连接的方法
+// 创建连接的方法
 func NewChannel(server Server, conn *net.TCPConn, connID uint32, messageDistribute MessageDistribute) Channel {
 	//初始化Conn属性
 	c := &channelImpl{
@@ -84,7 +84,7 @@ func NewChannel(server Server, conn *net.TCPConn, connID uint32, messageDistribu
 	return c
 }
 
-//	写消息Goroutine， 用户将数据发送给客户端
+// 写消息Goroutine， 用户将数据发送给客户端
 func (c *channelImpl) StartWriter() {
 	//fmt.Println("[Writer Goroutine is running]")
 	defer fmt.Println(c.RemoteAddr().String(), "[conn Writer exit!]")
@@ -115,7 +115,7 @@ func (c *channelImpl) StartWriter() {
 	}
 }
 
-//	读消息Goroutine，用于从客户端中读取数据
+// 读消息Goroutine，用于从客户端中读取数据
 func (c *channelImpl) StartReader() {
 	//fmt.Println("[Reader Goroutine is running]")
 	defer log.Info("%s conn Reader exit!", c.RemoteAddr().String())
@@ -159,12 +159,12 @@ func (c *channelImpl) StartReader() {
 	}
 }
 
-//子类实现
+// 子类实现
 func (c *channelImpl) InboundHandler(msg TcpMessage) {
 	c.MessageDistribute.RunHandler(msg)
 }
 
-//启动连接，让当前连接开始工作
+// 启动连接，让当前连接开始工作
 func (c *channelImpl) Start() {
 	//1 开启用户从客户端读取数据流程的Goroutine
 	go c.StartReader()
@@ -174,7 +174,7 @@ func (c *channelImpl) Start() {
 	c.TcpServer.ChannelActive(c)
 }
 
-//停止连接，结束当前连接状态M
+// 停止连接，结束当前连接状态M
 func (c *channelImpl) Stop() {
 	log.Info("Conn Stop()...ConnID = %d", c.ConnID)
 	//如果当前链接已经关闭
@@ -199,22 +199,22 @@ func (c *channelImpl) Stop() {
 	close(c.msgBuffChan)
 }
 
-//从当前连接获取原始的socket TCPConn
+// 从当前连接获取原始的socket TCPConn
 func (c *channelImpl) GetTCPConnection() *net.TCPConn {
 	return c.Conn
 }
 
-//获取当前连接ID
+// 获取当前连接ID
 func (c *channelImpl) GetConnID() uint32 {
 	return c.ConnID
 }
 
-//获取远程客户端地址信息
+// 获取远程客户端地址信息
 func (c *channelImpl) RemoteAddr() net.Addr {
 	return c.Conn.RemoteAddr()
 }
 
-//直接将Message数据发送数据给远程的TCP客户端
+// 直接将Message数据发送数据给远程的TCP客户端
 func (c *channelImpl) SendMsg(message TcpMessage) error {
 	if c.IsClosed == true {
 		return errors.New("connection closed when send msg")
@@ -237,7 +237,7 @@ func (c *channelImpl) SendMsg(message TcpMessage) error {
 	return nil
 }
 
-//是否关闭
+// 是否关闭
 func (c *channelImpl) IsClose() bool {
 	return c.IsClosed
 }
@@ -254,14 +254,14 @@ func (c *channelImpl) GetMsgBuffChan() chan []byte {
 	return c.msgBuffChan
 }
 
-//设置链接属性
+// 设置链接属性
 func (c *channelImpl) SetProperty(key string, value interface{}) {
 	c.propertyLock.Lock()
 	defer c.propertyLock.Unlock()
 	c.property[key] = value
 }
 
-//获取链接属性
+// 获取链接属性
 func (c *channelImpl) GetProperty(key string) (interface{}, error) {
 	c.propertyLock.RLock()
 	defer c.propertyLock.RUnlock()
@@ -272,19 +272,19 @@ func (c *channelImpl) GetProperty(key string) (interface{}, error) {
 	}
 }
 
-//移除链接属性
+// 移除链接属性
 func (c *channelImpl) RemoveProperty(key string) {
 	c.propertyLock.Lock()
 	defer c.propertyLock.Unlock()
 	delete(c.property, key)
 }
 
-//发送客户端消息
+// 发送客户端消息
 func SendClientMsg(c Channel, msgId int32, data []byte) error {
 	return SendMsg(c, msgId, 0, 0, data)
 }
 
-//直接将Message数据发送数据给远程的TCP客户端
+// 直接将Message数据发送数据给远程的TCP客户端
 func SendMsg(channel Channel, msgId int32, sessionId int64, senderId int64, data []byte) error {
 	if channel.IsClose() == true {
 		return errors.New("connection closed when send msg")
@@ -313,7 +313,7 @@ func SendMsg(channel Channel, msgId int32, sessionId int64, senderId int64, data
 	return nil
 }
 
-//发送proto消息
+// 发送proto消息
 func SendClientProtoMsg(channel Channel, msgId int32, msg proto.Message) error {
 	data, err := proto.Marshal(msg)
 	if err != nil {
@@ -323,7 +323,7 @@ func SendClientProtoMsg(channel Channel, msgId int32, msg proto.Message) error {
 	return SendMsg(channel, msgId, 0, 0, data)
 }
 
-//发送proto消息
+// 发送proto消息
 func SendProtoMsg(channel Channel, msgId int32, sessionId int64, senderId int64, msg proto.Message) error {
 	data, err := proto.Marshal(msg)
 	if err != nil {
@@ -333,7 +333,7 @@ func SendProtoMsg(channel Channel, msgId int32, sessionId int64, senderId int64,
 	return SendMsg(channel, msgId, sessionId, senderId, data)
 }
 
-//直接将Message数据发送数据给远程的TCP客户端
+// 直接将Message数据发送数据给远程的TCP客户端
 func SendBufMsg(channel Channel, msgId int32, sessionId int64, senderId int64, data []byte) error {
 	if channel.IsClose() == true {
 		return errors.New("connection closed when send msg")
