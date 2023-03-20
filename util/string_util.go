@@ -78,7 +78,7 @@ func ParseInt(numberStr string) int {
 	return int(number)
 }
 
-// is the string a port
+// IsPort is the string a port
 func IsPort(p string) bool {
 	pi, err := strconv.Atoi(p)
 	if err != nil {
@@ -104,4 +104,19 @@ func FirstLower(s string) string {
 		return ""
 	}
 	return strings.ToLower(s[:1]) + s[1:]
+}
+
+// ByteConvertString 字节大小转换 B==>KB==>MB==>GB
+func ByteConvertString(size float32) string {
+	if size < 0.1*KB {
+		return fmt.Sprintf("%.2fB", size)
+	} else if size < 0.1*MB {
+		return fmt.Sprintf("%.2fKB", size/KB)
+	} else if size < 0.1*GB {
+		return fmt.Sprintf("%.2fMB", size/MB)
+	} else if size < 0.1*TB {
+		return fmt.Sprintf("%.2fGB", size/GB)
+	} else {
+		return fmt.Sprintf("%.2fTB", size/TB)
+	}
 }
