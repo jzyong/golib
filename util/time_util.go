@@ -5,6 +5,12 @@ import (
 	"time"
 )
 
+const (
+	FormatTime     = "15:04:05"
+	FormatDate     = "2006-01-02"
+	FormatDateTime = "2006-01-02 15:04:05"
+)
+
 //自定义系统时间，可以内部设置偏移量
 
 // 时间偏移量 秒
@@ -12,7 +18,7 @@ var timeOffsetSecond int64 = 0
 
 // 设置系统时间
 func SetTime(timeStr string) {
-	t, err := time.ParseInLocation("2006-01-02 15:04:05", timeStr, time.Local)
+	t, err := time.ParseInLocation(FormatDateTime, timeStr, time.Local)
 	if err != nil {
 		log.Error("parse Time %v error:%v", timeStr, err)
 	}
@@ -71,12 +77,12 @@ func ZeroUnixTime(offsetDay int) int64 {
 
 // BetweenNow 是否在当前时间内
 func BetweenNow(startTime, endTime string) bool {
-	start, err := time.ParseInLocation("2006-01-02 15:04:05", startTime, time.Local)
+	start, err := time.ParseInLocation(FormatDateTime, startTime, time.Local)
 	if err != nil {
 		log.Error("parse start time %v error:%v", startTime, err)
 		return false
 	}
-	end, err := time.ParseInLocation("2006-01-02 15:04:05", endTime, time.Local)
+	end, err := time.ParseInLocation(FormatDateTime, endTime, time.Local)
 	if err != nil {
 		log.Error("parse end time %v error:%v", endTime, err)
 		return false
