@@ -28,11 +28,12 @@ func NewExponentialMovingAverage(n int) *ExponentialMovingAverage {
 func (ema *ExponentialMovingAverage) Add(newValue float64) {
 	// simple algorithm for EMA described here:
 	// https://en.wikipedia.org/wiki/Moving_average#Exponentially_weighted_moving_variance_and_standard_deviation
+	// https://en.wikipedia.org/wiki/Exponential_smoothing  公式参考
 	if ema.initialized {
 		delta := newValue - ema.Value
 		ema.Value += ema.alpha * delta
-		ema.Variance = (1 - ema.alpha) * (ema.Variance + ema.alpha*delta*delta)
-		ema.StandardDeviation = math.Sqrt(ema.Variance)
+		ema.Variance = (1 - ema.alpha) * (ema.Variance + ema.alpha*delta*delta) //方差
+		ema.StandardDeviation = math.Sqrt(ema.Variance)                         //标准差
 	} else {
 		ema.Value = newValue
 		ema.initialized = true
