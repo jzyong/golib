@@ -3,6 +3,7 @@ package math
 import "math"
 
 // ExponentialMovingAverage 指数移动平均线 ,复制于Mirror ExponentialMovingAverage
+// https://en.wikipedia.org/wiki/Exponential_smoothing
 type ExponentialMovingAverage struct {
 	alpha             float64
 	initialized       bool
