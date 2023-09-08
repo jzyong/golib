@@ -13,7 +13,7 @@ import (
 // https://www.cnblogs.com/qiniu/p/10735183.html
 // zookeeper go语言的监听不完善，如果不考虑java程序，选择etcd
 
-//创建zookeeper连接
+// 创建zookeeper连接
 func ZKCreateConnect(hosts []string) *zk.Conn {
 	connect, _, err := zk.Connect(hosts, time.Second*5)
 	if err != nil {
@@ -116,8 +116,8 @@ func ZKDelete(conn *zk.Conn, path string) {
 	log.Info("路径%s 删除", path)
 }
 
-//事件监听 只能监听一层子目录？
-func ZKWatchChildrenW(conn *zk.Conn, path string) (chan []string, chan error) {
+// ZKWatchChildrenW 事件监听 只能监听一层子目录？
+func ZKWatchChildrenW(conn *zk.Conn, path string, errClose bool) (chan []string, chan error) {
 	children := make(chan []string)
 	errors := make(chan error)
 
@@ -126,13 +126,18 @@ func ZKWatchChildrenW(conn *zk.Conn, path string) (chan []string, chan error) {
 			c, _, events, err := conn.ChildrenW(path)
 			if err != nil {
 				errors <- err
-				return
+				if errClose {
+					return
+				}
+
 			}
 			children <- c
 			e := <-events
 			if e.Err != nil {
 				errors <- e.Err
-				return
+				if errClose {
+					return
+				}
 			}
 			log.Info("路径：%v 发生改变：%v", path, e)
 		}
@@ -140,7 +145,7 @@ func ZKWatchChildrenW(conn *zk.Conn, path string) (chan []string, chan error) {
 	return children, errors
 }
 
-//服务配置，参考java zookeeper服务发现定义
+// ServiceConfig 服务配置，参考java zookeeper服务发现定义
 type ServiceConfig struct {
 	Name                string `json:"name"`
 	Id                  string `json:"id"`
