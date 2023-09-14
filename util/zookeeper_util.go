@@ -65,7 +65,7 @@ func ZKAdd(conn *zk.Conn, path string, value string, flag int32) {
 		log.Error("zookeeper create fail: %v %v\n", path, err)
 		return
 	}
-	log.Info(" zookeeper createnote: %s ", s)
+	log.Info(" zookeeper create note: %s ", s)
 }
 
 // 查
@@ -105,15 +105,17 @@ func ZKUpdate(conn *zk.Conn, path string, value string) {
 	log.Info("%s update to:%s\n", path, value)
 }
 
-// 删
 func ZKDelete(conn *zk.Conn, path string) {
+	// ZKDelete 删
 	_, sate, _ := conn.Get(path)
 	err := conn.Delete(path, sate.Version)
 	if err != nil {
-		fmt.Printf("数据删除失败: %v\n", err)
+		if err != zk.ErrNoNode {
+			log.Warn("delete node fail: %v", err)
+		}
 		return
 	}
-	log.Info("路径%s 删除", path)
+	log.Info("delete node:%s", path)
 }
 
 // ZKWatchChildrenW 事件监听 只能监听一层子目录？
