@@ -65,7 +65,7 @@ func ZKAdd(conn *zk.Conn, path string, value string, flag int32) {
 		log.Error("zookeeper create fail: %v %v\n", path, err)
 		return
 	}
-	log.Info(" zookeeper create note: %s ", s)
+	log.Info(" zookeeper create node: %s ", s)
 }
 
 // 查
