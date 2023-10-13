@@ -4,42 +4,47 @@ package log
    全局默认提供一个Log对外句柄，可以直接使用API系列调用
 */
 
-//默认日志
+// 默认日志
 var DefaultLog = NewLogger("", BitDefault)
 
-//获取Log 标记位
+// 获取Log 标记位
 func Flags() int {
 	return DefaultLog.Flags()
 }
 
-//设置Log标记位
+// 设置Log标记位
 func ResetFlags(flag int) {
 	DefaultLog.ResetFlags(flag)
 }
 
-//添加flag标记
+// 添加flag标记
 func AddFlag(flag int) {
 	DefaultLog.AddFlag(flag)
 }
 
-//设置Log 日志头前缀
+// 设置Log 日志头前缀
 func SetPrefix(prefix string) {
 	DefaultLog.SetPrefix(prefix)
 }
 
-//设置Log绑定的日志文件 ,绑定后不能在控制台输出
+// 设置Log绑定的日志文件 ,绑定后不能在控制台输出
 func SetLogFile(fileDir string, fileName string) {
 	DefaultLog.SetLogFile(fileDir, fileName)
 }
 
-//设置关闭debug
+// 设置关闭debug
 func CloseDebug() {
 	DefaultLog.CloseDebug()
 }
 
-//设置打开debug
+// 设置打开debug
 func OpenDebug() {
 	DefaultLog.OpenDebug()
+}
+
+// Trace 不做任何输出，占位
+func Trace(format string, v ...interface{}) {
+
 }
 
 // ====> Debug <====
